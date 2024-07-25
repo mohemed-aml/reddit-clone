@@ -1,5 +1,5 @@
-<<<<<<< HEAD
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# reddit-clone
+A clone of reddit built using nextjs 14, firebase, chakra ui and recoil
 
 ## Getting Started
 
@@ -36,6 +36,3 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
 =======
-# reddit-clone
-A clone of reddit built using nextjs 14, firebase, chakra ui and recoil
->>>>>>> f201dc020b162c227ee5b57bd922161edc3b8313
