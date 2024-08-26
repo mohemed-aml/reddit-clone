@@ -13,10 +13,11 @@ const Navbar: React.FC = () => {
   return (
     <Flex bg='white' height='44px' padding='28px 12px' justify={{ md: 'space-between' }}>
       <Flex align='center' width={{ base:'40px', md:'auto' }} mr={{ base: 0, md: 2 }} ml={{ base: 0, md: 2 }}>
-        <Image src='/images/RedditIcon.svg' height='37px' />
+        <Image src='/images/RedditIcon.svg' alt="Reddit Icon" height='37px' />
         <Image 
           src='/images/RedditText.svg' 
           height='22px'
+          alt="Reddit Text Icon"
           display={{base: 'none', md: 'unset'}}
         />
         { user && <Directory />}

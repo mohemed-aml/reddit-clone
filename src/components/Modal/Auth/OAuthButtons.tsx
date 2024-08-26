@@ -21,11 +21,11 @@ const AuthInputs: React.FC = () => {
         <span className="flex-grow text-14 overflow-hidden overflow-ellipsis align-top">Continue with phone number</span>
       </Button>
       <Button variant={'oauth'} mb={2} isLoading={googleLoading} onClick={() => signInWithGoogle()}>
-        <Image src='/images/googlelogo.png' height='20px' mr={4}/>
+      <Image src='/images/googlelogo.png' alt="Google logo" height='20px' mr={4}/>
         <span className="flex-grow text-14 overflow-hidden overflow-ellipsis align-top">Continue with Google</span>
       </Button>
       <Button variant={'oauth'} mb={2}>
-        <Image src='/images/applelogoblack.png' height='20px' mr={4}/>
+        <Image src='/images/applelogoblack.png' alt="Apple logo" height='20px' mr={4}/>
         <span className="flex-grow text-14 overflow-hidden overflow-ellipsis align-top">Continue with Apple</span>
       </Button>
       <Text textAlign='center' color='red' fontSize='10pt'> {FIREBASE_ERRORS[googleError?.message as keyof typeof FIREBASE_ERRORS] || googleError?.message} </Text>
