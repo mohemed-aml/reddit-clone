@@ -2,7 +2,7 @@
 
 import { auth, firestore } from "@/firebase/clientApp";
 import { Text, Box, Button, Divider, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Input, Stack, Flex, RadioGroup, Radio, Icon, Switch } from "@chakra-ui/react";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, getDoc, runTransaction, serverTimestamp, setDoc, Transaction } from "firebase/firestore";
 import React, { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { BsFillEyeFill, BsFillPersonFill } from "react-icons/bs";
@@ -44,6 +44,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
 
   const handleCreateCommunity = async () => {
     if (error) {setError('')};
+
     // Validate the Community Name
     const format = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/;
     if (communityName.length < 3 || format.test(communityName)) {
@@ -52,28 +53,36 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
       );
     }
     setLoading(true);
-
+    
     try {
-      // Check the name is not taken
       const communityDocRef = doc(firestore, 'communities', communityName);
-      const communityDoc = await getDoc(communityDocRef);
-      if (communityDoc.exists()) {
-        throw new Error(`r/${communityName} is already taken`);
-      }
 
-      // Create Community document in firestore
-      await setDoc(communityDocRef, {
-        creatorId: user?.uid,
-        createdAt: serverTimestamp(),
-        numberOfMembers: 1,
-        privacyType: communityType,
-        maturity: communityMaturity
+      await runTransaction(firestore, async (transaction) => {
+        // Check the name is not taken
+        const communityDoc = await transaction.get(communityDocRef);
+        if (communityDoc.exists()) {
+          throw new Error(`r/${communityName} is already taken`);
+        }
+
+        // Create Community document in firestore
+        await transaction.set(communityDocRef, {
+          creatorId: user?.uid,
+          createdAt: serverTimestamp(),
+          numberOfMembers: 1,
+          privacyType: communityType,
+          maturity: communityMaturity
+        });
+
+        // Create Community snippet in firestore
+        transaction.set(doc(firestore, `users/${user?.uid}/commmunitySnippets`, communityName), {
+          communityId: communityName,
+          isModerator: true,
+        });
       });
     } catch (error: any) {
       console.log('handleCreateCommunity Error', error);
       setError(error.message);
     }
-    
     setLoading(false);
   };
 

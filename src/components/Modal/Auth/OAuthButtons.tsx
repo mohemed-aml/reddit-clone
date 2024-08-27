@@ -2,12 +2,25 @@
 
 import { FIREBASE_ERRORS } from "@/firebase/errors";
 import { Button, Flex, Image, Text } from "@chakra-ui/react";
-import React from "react";
+import React, { useEffect } from "react";
 import { useSignInWithGoogle } from 'react-firebase-hooks/auth';
-import { auth } from '../../../firebase/clientApp';
+import { auth, firestore } from '../../../firebase/clientApp';
+import { doc, setDoc } from "firebase/firestore";
+import { User } from "firebase/auth";
 
 const AuthInputs: React.FC = () => {
-  const [ signInWithGoogle, googleUser, googleLoading, googleError ] = useSignInWithGoogle(auth);
+  const [ signInWithGoogle, userCred, googleLoading, googleError ] = useSignInWithGoogle(auth);
+
+  const createUserDocument = async (user: User) => {
+    const userDocRef = doc(firestore, 'users', user.uid);
+    await setDoc(userDocRef, JSON.parse(JSON.stringify(user)));
+  };
+
+  useEffect(() => {
+    if(userCred) {
+      createUserDocument(userCred.user)
+    }
+  }, [userCred])
   return (
     <Flex
       direction='column'
