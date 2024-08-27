@@ -1,7 +1,10 @@
 // /src/components/Navbar/Directory/CreateCommunityModal.tsx
 
+import { auth, firestore } from "@/firebase/clientApp";
 import { Text, Box, Button, Divider, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Input, Stack, Flex, RadioGroup, Radio, Icon, Switch } from "@chakra-ui/react";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { BsFillEyeFill, BsFillPersonFill } from "react-icons/bs";
 import { HiLockClosed } from "react-icons/hi";
 
@@ -16,15 +19,62 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
 }) => {
   const[communityName, setCommunityName] = useState('');
   const[nameCharCount, setNameCharCount] = useState(0);
+  const[communityType, setCommunityType] = useState('public');
+  const[communityMaturity, setCommunityMaturity] = useState(false);
+  const[error, setError] = useState('');
+  const[user] = useAuthState(auth);
+  const[loading, setLoading] = useState(false);
 
   // const[communityDescription, setCommunityDescription] = useState('');
   // const[descriptionCharCount, setDescriptionCharCount] = useState(0);
 
-  const[communityType, setCommunityType] = useState('public');
   const handleNameChange = (event:React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.value.length > 21) return;
     setCommunityName(event.target.value);
     setNameCharCount(event.target.value.length);
+  };
+
+  const onCommunityTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCommunityType(event.target.value);
+  };
+
+  const onCommunityMaturityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCommunityMaturity(event.target.checked);
+  };
+
+  const handleCreateCommunity = async () => {
+    if (error) {setError('')};
+    // Validate the Community Name
+    const format = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/;
+    if (communityName.length < 3 || format.test(communityName)) {
+      return setError(
+        "Community names must be between 3-21 characters, and can only contain letters, numbers, or underscores"
+      );
+    }
+    setLoading(true);
+
+    try {
+      // Check the name is not taken
+      const communityDocRef = doc(firestore, 'communities', communityName);
+      const communityDoc = await getDoc(communityDocRef);
+      if (communityDoc.exists()) {
+        throw new Error(`r/${communityName} is already taken`);
+      }
+
+      // Create Community document in firestore
+      await setDoc(communityDocRef, {
+        creatorId: user?.uid,
+        createdAt: serverTimestamp(),
+        numberOfMembers: 1,
+        privacyType: communityType,
+        maturity: communityMaturity
+      });
+    } catch (error: any) {
+      console.log('handleCreateCommunity Error', error);
+      setError(error.message);
+    }
+    
+    setLoading(false);
   };
 
   return (
@@ -74,6 +124,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
                 onChange={handleNameChange}
               />
               <Text textAlign='right' fontSize='9pt' color={nameCharCount >= 21 ? 'red' : 'gray.500'}>{nameCharCount}/21</Text>
+              <Text fontSize='9pt' color='red' pt={1}>{error}</Text>
               <Box>
                 <Text fontWeight={600} fontSize={15}>Community Type</Text>
                 <RadioGroup onChange={setCommunityType} value={communityType} mt={2} mb={2}>
@@ -93,7 +144,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
                         <Text fontSize='14px' mr={1}>Public</Text>
                         <Text fontSize='12px' color='gray.500'>Anyone can view and contribute</Text>
                       </Flex>
-                      <Radio value='public'></Radio>
+                      <Radio value='public' onChange={onCommunityTypeChange}></Radio>
                     </Flex>
                     <Flex
                       display='flex'
@@ -108,7 +159,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
                         <Text fontSize='14px' mr={1}>Restricted</Text>
                         <Text fontSize='12px' color='gray.500'>Anyone can view, but only approved users can contribute</Text>
                       </Flex>
-                      <Radio variant='black' value='restricted' ></Radio>
+                      <Radio value='restricted' onChange={onCommunityTypeChange}></Radio>
                     </Flex>
                     <Flex
                       display='flex'
@@ -123,7 +174,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
                         <Text fontSize='14px' mr={1}>Private</Text>
                         <Text fontSize='12px' color='gray.500'>Only approved users can view and contribute</Text>
                       </Flex>
-                      <Radio variant='black' value='private' ></Radio>
+                      <Radio value='private' onChange={onCommunityTypeChange}></Radio>
                     </Flex>
                   </Stack>
                 </RadioGroup>
@@ -143,7 +194,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
                         <Text fontSize='14px' ml={2}  mr={1}>Mature (18+)</Text>
                         <Text fontSize='12px' color='gray.500'>Users must be over 18 to view and contribute</Text>
                       </Flex>
-                      <Switch size='lg' />
+                      <Switch size='lg' onChange={onCommunityMaturityChange}/>
                     </Flex>
               </Box>
             </ModalBody>
@@ -155,11 +206,11 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
             <Box></Box>
             <Flex>
               <Button variant='outline' mr={3} onClick={handleClose}>Cancel</Button>
-              <Button variant='solid'>Create Community</Button>
+              <Button variant='solid' onClick={handleCreateCommunity} isLoading={loading}>Create Community</Button>
             </Flex>
           </Flex>
           
-        </ModalFooter>
+        </ModalFooter>  
       </ModalContent>
     </Modal>
   )
