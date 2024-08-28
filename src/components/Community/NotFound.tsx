@@ -1,6 +1,5 @@
 // src/components/Community/NotFound.tsx
 "use client"
-
 import React from "react";
 import { Button, Divider, Flex, Icon, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text } from "@chakra-ui/react";
 import { IoIosInformationCircleOutline } from "react-icons/io";
