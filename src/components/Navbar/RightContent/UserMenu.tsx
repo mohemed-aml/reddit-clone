@@ -1,5 +1,4 @@
 // /src/components/Navbar/RightContent/UserMenu.tsx
-
 import { authModalState } from "@/atoms/AuthModalAtom";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { Flex, Icon, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Text } from "@chakra-ui/react";

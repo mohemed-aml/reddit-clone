@@ -1,5 +1,4 @@
 // /src/components/Modal/Auth/AuthInputs.tsx
-
 import { authModalState } from "@/atoms/AuthModalAtom";
 import { Flex } from "@chakra-ui/react";
 import React from "react";

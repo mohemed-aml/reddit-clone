@@ -1,5 +1,4 @@
 // /src/chakra/button.ts
-
 import { ComponentStyleConfig } from '@chakra-ui/theme';
 
 export const Button: ComponentStyleConfig = {

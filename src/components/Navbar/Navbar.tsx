@@ -1,5 +1,4 @@
 // /src/components/Navbar/Navbar.tsx
-
 import { auth } from "@/firebase/clientApp";
 import { Flex, Image } from "@chakra-ui/react";
 import React from "react";

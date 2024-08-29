@@ -1,5 +1,4 @@
 // /src/atoms/AuthModalAtom.ts
-
 import { atom } from "recoil";
 
 export interface AuthModalState {

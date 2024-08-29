@@ -1,5 +1,4 @@
 // /src/components/Navbar/Directory/Directory.tsx
-
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { Flex, Icon, Menu, MenuButton, MenuList, Text } from "@chakra-ui/react";
 import React from "react";

@@ -1,5 +1,4 @@
 // /src/components/Modal/Auth/OAuthButtons.tsx
-
 import { FIREBASE_ERRORS } from "@/firebase/errors";
 import { Button, Flex, Image, Text } from "@chakra-ui/react";
 import React, { useEffect } from "react";

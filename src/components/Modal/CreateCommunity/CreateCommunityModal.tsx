@@ -1,5 +1,4 @@
 // /src/components/Navbar/Directory/CreateCommunityModal.tsx
-
 import { auth, firestore } from "@/firebase/clientApp";
 import { Text, Box, Button, Divider, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Input, Stack, Flex, RadioGroup, Radio, Icon, Switch } from "@chakra-ui/react";
 import { doc, getDoc, runTransaction, serverTimestamp, setDoc, Transaction } from "firebase/firestore";

@@ -1,5 +1,4 @@
 // /src/components/Navbar/RightContent/RightContent.tsx
-
 import AuthModal from "../../Modal/Auth/AuthModal";
 import { Flex } from "@chakra-ui/react";
 import { User } from "firebase/auth";

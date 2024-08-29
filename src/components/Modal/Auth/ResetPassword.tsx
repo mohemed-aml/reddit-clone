@@ -1,5 +1,4 @@
 // /src/components/Modal/Auth/ResetPassword.tsx
-
 import { Button, Flex, Icon, Input, Text } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { useSendPasswordResetEmail } from "react-firebase-hooks/auth";

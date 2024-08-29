@@ -1,5 +1,4 @@
 // /src/components/Navbar/SearchInput.tsx
-
 "use client"
 import { SearchIcon } from "@chakra-ui/icons";
 import { Flex, Input, InputGroup, InputLeftElement } from "@chakra-ui/react";

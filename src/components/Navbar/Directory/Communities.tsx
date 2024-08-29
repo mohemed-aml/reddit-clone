@@ -1,5 +1,4 @@
 // /src/components/Navbar/Directory/Communities.tsx
-
 import CreateCommunityModal from "@/components/Modal/CreateCommunity/CreateCommunityModal";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { Flex, Icon, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react";

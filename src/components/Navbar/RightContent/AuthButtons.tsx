@@ -1,5 +1,4 @@
 // /src/components/Navbar/RightContent/AuthButtons.tsx
-
 "use client"
 import { authModalState } from "@/atoms/AuthModalAtom";
 import { Button } from "@chakra-ui/react";

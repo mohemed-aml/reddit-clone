@@ -1,4 +1,4 @@
-// src/components/Community/NotFound.tsx
+// src/components/Community/Header.tsx
 "use client"
 import { Community } from '@/atoms/communitiesAtom';
 import useCommunityData from '@/hooks/useCommunityData';
@@ -12,7 +12,6 @@ type HeaderProps = {
 
 const Header:React.FC<HeaderProps> = ({ communityData }) => {
   const { communityStateValue, onJoinOrLeaveCommunity, loading } = useCommunityData();
-  console.log(communityStateValue)
   const isJoined = !!communityStateValue.mySnippets.find(
     (item) => item.communityId === communityData.id
   );

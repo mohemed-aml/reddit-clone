@@ -1,3 +1,4 @@
+// src/atoms/communitiesAtom.ts
 import { Timestamp } from "firebase/firestore";
 import { atom } from "recoil";
 

@@ -1,5 +1,4 @@
 // /src/components/Modal/Auth/Login.tsx
-
 import { authModalState } from "@/atoms/AuthModalAtom";
 import { Button, Flex, Input, Text } from "@chakra-ui/react";
 import React, { useState } from "react";

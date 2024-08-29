@@ -1,5 +1,4 @@
 // /src/chakra/theme.ts
-
 import { extendTheme } from "@chakra-ui/react";
 import { Button } from "./button";
 import '@fontsource/open-sans/300.css';

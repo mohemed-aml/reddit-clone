@@ -1,5 +1,4 @@
 // /src/components/Modal/Auth/AuthModal.tsx
-
 "use client"
 import { authModalState } from "@/atoms/AuthModalAtom";
 import { auth } from "@/firebase/clientApp";
