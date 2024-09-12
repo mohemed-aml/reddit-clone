@@ -1,49 +1,36 @@
 // src/app/r/[communityId]/page.tsx
-import { Community } from "@/atoms/communitiesAtom";
+"use client";
+import About from "@/components/Community/About";
 import CreatePostLink from "@/components/Community/CreatePostLink";
 import Header from "@/components/Community/Header";
 import NotFound from "@/components/Community/NotFound";
 import PageContent from "@/components/Layout/PageContent";
-// import Posts from "@/components/Posts/Posts";
-import { firestore } from "@/firebase/clientApp";
-import { doc, getDoc } from "firebase/firestore";
+import Posts from "@/components/Posts/Posts";
+import useCommunityData from "@/hooks/useCommunityData";
 import React from "react";
-import safeJsonStringify from "safe-json-stringify";
 
-type CommunityPageProps = {
-  communityData: Community;
-};
+const CommunityPage: React.FC<{ params: { communityId: string } }> = ({ params }) => {
+  const { communityData, loading } = useCommunityData(params.communityId);
 
-async function getCommunityData(communityId: string) {
-  try {
-    const communityDocRef = doc(firestore, 'communities', communityId);
-    const communityDoc = await getDoc(communityDocRef);
-    if (!communityDoc.exists()) {
-      return null; // Return null if the community doesn't exist
-    }
-    return JSON.parse(safeJsonStringify({ id: communityDoc.id, ...communityDoc.data() }));
-  } catch (error) {
-    console.error('Error fetching community data:', error);
-    return null;
+  if (loading) {
+    return <div>Loading...</div>;
   }
-}
-
-const CommunityPage: React.FC<{ params: { communityId: string } }> = async ({ params }) => {
-  const communityData = await getCommunityData(params.communityId);
+  
   if (!communityData) {
-    return (
-      <NotFound />  
-    );
+    return <NotFound />
   }
+
   return (
     <>
      <Header communityData={communityData} />
      <PageContent>
       <>
         <CreatePostLink />
-        {/* <Posts communityData={communityData}/> */}
+        <Posts communityData={communityData} />
       </>
-      <><div>RHS</div></>
+      <>
+        <About communityData={communityData} pt={2} onCreatePage={false} loading={false}/>
+      </>
      </PageContent>
     </>
   );

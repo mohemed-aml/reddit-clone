@@ -15,15 +15,13 @@ export type Post = {
   communityImageURL?: string;
   createdAt?: Timestamp;
   editedAt?: Timestamp;
-
-  // currentUserVoteStatus?: { id: string; voteValue: number };
-  // postIdx?: number;
-  
+  currentUserVoteStatus?: { id: string; voteValue: number };
+  postIdx?: number;
 };
 
 export type PostVote = {
   id?: string;
-  postId: string;
+  postId?: string;
   communityId: string;
   voteValue: number;
 };

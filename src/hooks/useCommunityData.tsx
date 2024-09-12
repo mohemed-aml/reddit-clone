@@ -1,17 +1,21 @@
-// src/app/r/[communityId]/page.tsx
+// src/hooks/useCommunityData.tsx
+'use client'
 import { authModalState } from "@/atoms/AuthModalAtom";
 import { Community, CommunitySnippet, communityState } from "@/atoms/communitiesAtom";
 import { auth, firestore } from "@/firebase/clientApp";
-import { collection, doc, getDocs, increment, writeBatch } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, increment, writeBatch } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRecoilState, useSetRecoilState } from "recoil";
-const useCommunityData = () => {
+import safeJsonStringify from "safe-json-stringify";
+
+const useCommunityData = (communityId?: string) => {
   const [user] = useAuthState(auth);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const setAuthModalState = useSetRecoilState(authModalState);
   const [communityStateValue, setCommunityStateValue] = useRecoilState(communityState);
+
   const joinCommunity = async (communityData: Community) => {
     setLoading(true)
     try {
@@ -41,6 +45,7 @@ const useCommunityData = () => {
     }
     setLoading(false)
   };
+
   const leaveCommunity = async (communityId: string) => {
     setLoading(true)
     try {
@@ -96,15 +101,47 @@ const useCommunityData = () => {
     setLoading(false)
   }, [user, setCommunityStateValue]);
 
+  const getCommunityData = useCallback(async (communityId: string) => {
+    setLoading(true);
+    try {
+      const communityDocRef = doc(firestore, 'communities', communityId);
+      const communityDoc = await getDoc(communityDocRef);
+      if (communityDoc.exists()) {
+        const communityData = JSON.parse(
+          safeJsonStringify({ id: communityDoc.id, ...communityDoc.data() })
+        );
+        setCommunityStateValue(prev => ({
+          ...prev,
+          currentCommunity: communityData as Community,
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching community data:', error);
+      setError('Error fetching community data');
+    }
+    setLoading(false);
+  }, [setCommunityStateValue]);
+
   useEffect(() => {
-    if(!user) return;
-    getMySnippets();
+    if (user) {
+      getMySnippets();
+    }
   }, [user, getMySnippets]);
+
+  useEffect(() => {
+    if (communityId && !communityStateValue.currentCommunity) {
+      getCommunityData(communityId);
+    }
+  }, [communityId, communityStateValue.currentCommunity, getCommunityData]);
 
   return {
     communityStateValue,
     onJoinOrLeaveCommunity,
     loading,
+    error,
+    setError,
+    communityData: communityStateValue.currentCommunity,
   };
 };
+
 export default useCommunityData;

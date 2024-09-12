@@ -1,7 +1,8 @@
 // src/components/Posts/NewPostForm.tsx
 import { Post, postState } from "@/atoms/postsAtom";
 import { firestore, storage } from "@/firebase/clientApp";
-import { Alert, AlertDescription, AlertIcon, AlertTitle, CloseButton, Flex, Icon } from "@chakra-ui/react";
+import useSelectFile from "@/hooks/useSelectFile";
+import { Alert, AlertIcon, AlertTitle, Flex, Icon } from "@chakra-ui/react";
 import { User } from "firebase/auth";
 import { addDoc, collection, serverTimestamp, Timestamp, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadString } from "firebase/storage";
@@ -49,11 +50,10 @@ type NewPostFormProps = {
   // communityImageURL?: string;
 };
 
-// const NewPostForm: React.FC<NewPostFormProps> = ({ communityId, communityImageURL, user }) => {
 const NewPostForm: React.FC<NewPostFormProps> = ({ user }) => {
   const [selectedTab, setSelectedTab] = useState(formTabs[0].title);
   const [textInputs, setTextInputs] = useState({ title: "", body: "" });
-  const [selectedFile, setSelectedFile] = useState<string>();
+  const { selectedFile, setSelectedFile, onSelectFile} = useSelectFile();
   const selectFileRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -105,19 +105,6 @@ const NewPostForm: React.FC<NewPostFormProps> = ({ user }) => {
     setLoading(false);
   };
 
-  const onSelectImage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const reader = new FileReader();
-    if (event.target.files?.[0]) {
-      reader.readAsDataURL(event.target.files[0]);
-    }
-
-    reader.onload = (readerEvent) => {
-      if (readerEvent.target?.result) {
-        setSelectedFile(readerEvent.target?.result as string);
-      }
-    };
-  };
-
   const onTextChange = ({
     target: { name, value },
   }: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -154,7 +141,7 @@ const NewPostForm: React.FC<NewPostFormProps> = ({ user }) => {
             setSelectedFile={setSelectedFile}
             setSelectedTab={setSelectedTab}
             selectFileRef={selectFileRef}
-            onSelectImage={onSelectImage}
+            onSelectImage={onSelectFile}
           />
         )}
       </Flex>

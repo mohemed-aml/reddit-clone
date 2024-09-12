@@ -1,32 +1,38 @@
 // src/components/Community/CreatePostLink.tsx
 "use client"
+import { authModalState } from "@/atoms/AuthModalAtom";
+import { auth } from "@/firebase/clientApp";
 import { Flex, Icon, Input } from "@chakra-ui/react";
-import Link from "next/link";
-import { useRouter, usePathname, useParams } from "next/navigation";
-import path from "path";
+import { useParams, useRouter } from "next/navigation";
 import React from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { BsLink45Deg } from "react-icons/bs";
 import { FaReddit } from "react-icons/fa";
 import { IoImageOutline } from "react-icons/io5";
-// import useDirectory from "../../hooks/useDirectory";
+import { useSetRecoilState } from "recoil";
 
 type CreatePostProps = {};
 
 const CreatePostLink: React.FC<CreatePostProps> = () => {
   const router = useRouter();
-  const pathname = usePathname();
   const params = useParams();
+  const [user] = useAuthState(auth);
+  const setAuthModalState = useSetRecoilState(authModalState);
   // const { toggleMenuOpen } = useDirectory();
 
-  const onClick = () => {
-    // Could check for user to open auth modal before redirecting to submit
-    const community = params.communityId;
-    if (community) {
-      router.push(`/r/${community}/submit`);
-      return;
+  const onClick = () => {    
+    if (user) {
+      const community = params.communityId;
+      if (community) {
+        router.push(`/r/${community}/submit`);
+        return;
+      }
+      // Open directory menu to select community to post to
+      // toggleMenuOpen();
     }
-    // Open directory menu to select community to post to
-    // toggleMenuOpen();    
+    else { // Could check for user to open auth modal before redirecting to submit
+      setAuthModalState({ open: true, view: 'login' });  // open modal    
+    }
   };
 
   return (
@@ -75,5 +81,4 @@ const CreatePostLink: React.FC<CreatePostProps> = () => {
     </Flex>
   );
 };
-
 export default CreatePostLink;

@@ -21,15 +21,23 @@ const Header:React.FC<HeaderProps> = ({ communityData }) => {
       <Box height='50%' bg='blue.400' />
       <Flex justify='center' bg='white' flexGrow={1}>
         <Flex width='95%' maxWidth='860px'>
-          {/* Placeholder for Community Image */}
-          {communityData.imageURL? (
-            <Image alt='communityDisplayImage'/>
+          {communityStateValue.currentCommunity?.imageURL? (
+            <Image
+              alt='communityDisplayImage'
+              src={communityStateValue.currentCommunity.imageURL}
+              boxSize='75px'
+              position='relative'
+              top={-4}
+              border='4px solid white'
+              borderRadius='full'
+              bg='white'
+            />
           ): (
               <Icon as={FaReddit} background='white' fontSize={75} position='relative' top={-4} color='blue.500' border='4px solid white' borderRadius='100%'/>
           )}
           <Flex padding='10px 16px'>
             <Flex direction='column' mr={6}>
-              <Text fontWeight={800} fontSize={20   }>{communityData.id}</Text>
+              <Text fontWeight={800} fontSize={20}>{communityData.id}</Text>
               <Text fontWeight={600} fontSize={12} color='gray.400'>r/{communityData.id}</Text>
             </Flex>
             <Button
