@@ -126,7 +126,13 @@ const useCommunityData = (communityId?: string) => {
     if (user) {
       getMySnippets();
     }
-  }, [user, getMySnippets]);
+    else {
+      setCommunityStateValue(prev => ({
+        ...prev,
+        mySnippets: []
+      }))
+    }
+  }, [user, getMySnippets, setCommunityStateValue]);
 
   useEffect(() => {
     if (communityId && !communityStateValue.currentCommunity) {

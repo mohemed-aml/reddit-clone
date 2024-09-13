@@ -73,7 +73,7 @@ const PostItem: React.FC<PostItemContentProps> = ({ post, userVoteValue, userIsC
           onClick={(event) => onVote(event, post, 1, post.communityId)}
         />
         <Text fontSize="9pt" fontWeight={600}>
-          {post.voteStatus}
+          {post.voteCount}
         </Text>
         <Icon
           as={

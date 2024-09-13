@@ -26,128 +26,75 @@ const usePosts = (communityData?: Community) => {
     communityId: string,
     postIdx?: number
   ) => {
+
     event.stopPropagation();
+    // If user is not authenticated and tries to vote, then we prompt the user to login 
     if (!user?.uid) {
-      setAuthModalState({ open: true, view: "login" });
-      return;
+      return setAuthModalState({ open: true, view: "login" });
     }
 
-    const { voteStatus } = post;
+    //grab the current vote count of the post, by destructuring it
+    const { voteCount } = post;
     // const existingVote = post.currentUserVoteStatus;
-    const existingVote = postStateValue.postVotes.find(
-      (vote) => vote.postId === post.id
-    );
-
-    // is this an upvote or a downvote?
-    // has this user voted on this post already? was it up or down?
+    const existingVote = postStateValue.votedPosts.find((votedPost) => votedPost.postId === post.id);
 
     try {
       let voteChange = vote;
       const batch = writeBatch(firestore);
+      // creating copies of state which can be modified and then used to update actual state
+      let updatedPost = { ...post };
+      let updatedPosts = [...postStateValue.posts];
+      let updatedVotedPosts = [...postStateValue.votedPosts];
 
-      const updatedPost = { ...post };
-      const updatedPosts = [...postStateValue.posts];
-      let updatedPostVotes = [...postStateValue.postVotes];
-
-      // New vote
-      if (!existingVote) {
-        const postVoteRef = doc(
-          collection(firestore, "users", `${user.uid}/postVotes`)
-        );
-
+       // has this user voted on this post already?
+      if (!existingVote) { // New vote
+        const postVoteRef = doc(collection(firestore, "users", `${user.uid}/votedPosts`));
         const newVote: PostVote = {
           id: postVoteRef.id,
           postId: post.id,
           communityId,
           voteValue: vote,
         };
-
-        console.log("NEW VOTE!!!", newVote);
-
-        // APRIL 25 - DON'T THINK WE NEED THIS
-        // newVote.id = postVoteRef.id;
-
         batch.set(postVoteRef, newVote);
-
-        updatedPost.voteStatus = voteStatus + vote;
-        updatedPostVotes = [...updatedPostVotes, newVote];
+        updatedVotedPosts = [...updatedVotedPosts, newVote];
       }
-      // Removing existing vote
-      else {
-        // Used for both possible cases of batch writes
-        const postVoteRef = doc(
-          firestore,
-          "users",
-          `${user.uid}/postVotes/${existingVote.id}`
-        );
-
-        // Removing vote
-        if (existingVote.voteValue === vote) {
+      else { // Removing existing vote
+        const postVoteRef = doc(firestore,"users",`${user.uid}/votedPosts/${existingVote.id}`);
+        if (existingVote.voteValue === vote) { // Removing previous vote
           voteChange *= -1;
-          updatedPost.voteStatus = voteStatus - vote;
-          updatedPostVotes = updatedPostVotes.filter(
-            (vote) => vote.id !== existingVote.id
-          );
+          updatedVotedPosts = updatedVotedPosts.filter((vote) => vote.id !== existingVote.id);
           batch.delete(postVoteRef);
         }
-        // Changing vote
-        else {
-          voteChange = 2 * vote;
-          updatedPost.voteStatus = voteStatus + 2 * vote;
-          const voteIdx = postStateValue.postVotes.findIndex(
-            (vote) => vote.id === existingVote.id
-          );
-          // console.log("HERE IS VOTE INDEX", voteIdx);
-
-          // Vote was found - findIndex returns -1 if not found
-          if (voteIdx !== -1) {
-            updatedPostVotes[voteIdx] = {
+        else { // Flipping vote
+          voteChange *= 2;
+          const voteIdx = postStateValue.votedPosts.findIndex((vote) => vote.id === existingVote.id);
+          if (voteIdx !== -1) { // Vote was found - findIndex returns -1 if not found
+            updatedVotedPosts[voteIdx] = {
               ...existingVote,
               voteValue: vote,
             };
           }
-          batch.update(postVoteRef, {
-            voteValue: vote,
-          });
+          batch.update(postVoteRef, {voteValue: vote});
         }
       }
-
-      let updatedState = { ...postStateValue, postVotes: updatedPostVotes };
-
-      const postIdx = postStateValue.posts.findIndex(
-        (item) => item.id === post.id
-      );
-
-      // if (postIdx !== undefined) {
+      updatedPost.voteCount = voteCount + voteChange;
+      const postIdx = postStateValue.posts.findIndex((item) => item.id === post.id);
       updatedPosts[postIdx!] = updatedPost;
-      updatedState = {
-        ...updatedState,
+      setPostStateValue((prev) => ({
+        ...prev,
         posts: updatedPosts,
+        votedPosts: updatedVotedPosts,
         postsCache: {
-          ...updatedState.postsCache,
+          ...prev.postsCache,
           [communityId]: updatedPosts,
         },
-      };
-      // }
-
-      /**
-       * Optimistically update the UI
-       * Used for single page view [pid]
-       * since we don't have real-time listener there
-       */
-      if (updatedState.selectedPost) {
-        updatedState = {
-          ...updatedState,
-          selectedPost: updatedPost,
-        };
-      }
-
-      // Optimistically update the UI
-      setPostStateValue(updatedState);
-
+        selectedPost: prev.selectedPost?.id === post.id 
+          ? { ...updatedPost, postIdx }
+          : prev.selectedPost,
+      }));
       // Update database
       const postRef = doc(firestore, "posts", `${post.id}`);
-      batch.update(postRef, { voteStatus: voteStatus + voteChange });
+      batch.update(postRef, { voteCount: voteCount + voteChange });
       await batch.commit();
     } catch (error) {
       console.log("onVote error", error);
@@ -196,18 +143,18 @@ const usePosts = (communityData?: Community) => {
   };
 
   const getCommunityPostVotes = useCallback(async (communityId: string) => {
-    const postVotesQuery = query(
-      collection(firestore, `users/${user?.uid}/postVotes`),
+    const votedPostsQuery = query(
+      collection(firestore, `users/${user?.uid}/votedPosts`),
       where("communityId", "==", communityId)
     );
-    const postVoteDocs = await getDocs(postVotesQuery);
-    const postVotes = postVoteDocs.docs.map((doc) => ({
+    const postVoteDocs = await getDocs(votedPostsQuery);
+    const votedPosts = postVoteDocs.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
     setPostStateValue((prev) => ({
       ...prev,
-      postVotes: postVotes as PostVote[],
+      votedPosts: votedPosts as PostVote[],
     }));
   }, [user?.uid, setPostStateValue]);
 
@@ -216,12 +163,12 @@ const usePosts = (communityData?: Community) => {
     getCommunityPostVotes(communityStateValue.currentCommunity.id);
   }, [user, communityStateValue.currentCommunity, getCommunityPostVotes]);
 
+  // Clear the votes if user Logs out or if there is no authenticated user
   useEffect(() => {
-    // Logout or no authenticated user
     if (!user?.uid && !loadingUser) {
       setPostStateValue((prev) => ({
         ...prev,
-        postVotes: [],
+        votedPosts: [],
       }));
     }
   }, [user, loadingUser, setPostStateValue]);

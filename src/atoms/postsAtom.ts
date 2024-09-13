@@ -10,7 +10,7 @@ export type Post = {
   title: string;
   body: string;
   numberOfComments: number;
-  voteStatus: number;
+  voteCount: number;
   imageURL?: string;
   communityImageURL?: string;
   createdAt?: Timestamp;
@@ -29,7 +29,7 @@ export type PostVote = {
 interface PostState {
   selectedPost: Post | null;
   posts: Post[];
-  postVotes: PostVote[];
+  votedPosts: PostVote[];
   postsCache: { [key: string]: Post[] };
   postUpdateRequired: boolean;
 }
@@ -37,7 +37,7 @@ interface PostState {
 export const defaultPostState: PostState = {
   selectedPost: null,
   posts: [],
-  postVotes: [],
+  votedPosts: [],
   postsCache: {},
   postUpdateRequired: true,
 };
